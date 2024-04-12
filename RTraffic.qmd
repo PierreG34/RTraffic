@@ -5,11 +5,12 @@ number-sections: true
 editor: visual
 ---
 
-```{=html}
-<!-- 
-Créé un tableau de bord du trafic aérien en France à partir des données en libre accès sur data.gouv.fr
- -->
-```
+# Funathon 2024 - Sujet 2
+
+Créer un tableau de bord du trafic aérien à partir de données en libre accès sur [DataGouv](https://www.data.gouv.fr/fr/datasets/trafic-aerien-commercial-mensuel-francais-par-paire-daeroports-par-sens-depuis-1990/) 
+
+## 1.Importations des libraries
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE,
@@ -28,7 +29,8 @@ t0 = Sys.time()
 
 ```
 
-# Paramètres
+## 1.Définition des bases de données, implémentation des fonctions utiles et chargement des données
+
 ```{r parameters}
 if (!requireNamespace("DT")){install.packages("DT")} #install.packages("DT")#if necessary install package
 t0 = Sys.time()
@@ -43,7 +45,11 @@ c("https://www.data.gouv.fr/fr/datasets/r/ddfea6a0-df7e-4402-99fc-165f573f2e10",
 )
 names(paths) = c("year","apt","lsn","cie")
 
-#charge les fonctions utiles----
+```
+
+On implémente les fonctions de calculs nécessaires au tableau de bord
+
+```{r}
 simplify_text = function(texte){#fonction qui simplifie le texte en retirant la ponctuation et les accents
   texte=tolower(texte)
   texte=str_replace_all(texte,"[:punct:]","")
@@ -72,17 +78,21 @@ load_data = function(data_typ){#fonction qui charge les données dans un datafra
   rm(x,i)
   return(df)
   }
+```
 
+On charge ensuite les données
+
+```{r}
 #charge les données avec la fonction load_data----
 pax_apt = load_data("apt")
 pax_cie = load_data("cie")
 pax_lsn = load_data("lsn")
 data_already_loaded = TRUE
 print(Sys.time()-t0) #mesure le temps machine----
-
 ```
 
-# ui
+## 3.Définition de l'interface utilisateur pour le programme shiny : ui
+
 ```{r ui}
 ui <- function() {
 fluidPage(
@@ -100,7 +110,8 @@ fluidPage(
 
 ```
 
-# server
+## 4.Définition de la partie server pour le programme shiny : server
+
 ```{r server}
 server <- function(input, output, session) {
   output$texte <- renderText({
@@ -169,7 +180,7 @@ server <- function(input, output, session) {
 
 ```
 
-# shiny
+## 5. RUN du shiny
 
 ```{r shiny}
 
