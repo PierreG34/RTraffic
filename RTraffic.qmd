@@ -97,7 +97,7 @@ rm(x,i)
 
 ```
 
-On géénralise le cas précédent avec une fonction prenant en entrée le type de données que l'on veut extraire (par aéroports, par liaisons ou par compagnies) et on concatène sur toutes les années à disposition de 2018 à 2022.
+On généralise le cas précédent avec une fonction prenant en entrée le type de données que l'on veut extraire (par aéroports, par liaisons ou par compagnies) et on concatène sur toutes les années à disposition de 2018 à 2022.
 
 ```{r}
 load_data = function(data_typ){#fonction qui charge les données dans un dataframe
@@ -107,7 +107,8 @@ load_data = function(data_typ){#fonction qui charge les données dans un datafra
     x = paths %>%
       select("year", all_of(data_typ)) %>% 
       filter(year == i) #filtre sur l'année sélectionnée
-    df = rbind(df,read.csv(x[[2]], sep = ";", dec = ",")) #empile le dataframe sur le précédent
+    temp <- read.csv(x[[2]], sep = ";", dec = ",")
+    df = rbind(df,temp) #empile le dataframe sur le précédent
     }
   df = df %>% 
     mutate(an = str_sub(ANMOIS,1,4)) %>%
@@ -118,6 +119,7 @@ load_data = function(data_typ){#fonction qui charge les données dans un datafra
   }
 ```
 
+On applique le modèle vu précédemment pour créer trois tables, chacune pour un data_typ: par aéroports (apt), par liaisons (lsn) et par compagnies (cie)
 
 ```{r}
 #charge les données avec la fonction load_data----
