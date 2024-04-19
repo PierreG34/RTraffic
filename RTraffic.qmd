@@ -86,14 +86,14 @@ for (i in year){
   x <- paths %>%
     select("year", all_of(data_typ)) %>% 
     filter(year == i) #filtre sur l'année sélectionnée
-  aptData <- rbind(df,read.csv(x[[2]], sep = ";", dec = ",")) #empile le dataframe sur le précédent
+  temp <- read.csv2(x[[2]])
+  aptData <- rbind(aptData,temp) #empile le dataframe sur le précédent
   }
 aptData <- aptData %>% 
   mutate(an = str_sub(ANMOIS,1,4)) %>%
   mutate(mois = str_sub(ANMOIS,5,6))
-names(df)=simplify_text(names(df))
+names(aptData)=simplify_text(names(aptData))
 rm(x,i)
-
 
 ```
 
