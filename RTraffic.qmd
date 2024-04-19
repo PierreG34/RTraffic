@@ -7,7 +7,7 @@ editor: visual
 
 # Funathon 2024 - Sujet 2
 
-Créer un tableau de bord du trafic aérien à partir de données en libre accès sur [DataGouv](https://www.data.gouv.fr/fr/datasets/trafic-aerien-commercial-mensuel-francais-par-paire-daeroports-par-sens-depuis-1990/) 
+Créer un tableau de bord du trafic aérien à partir de données en libre accès sur [DataGouv](https://www.data.gouv.fr/fr/datasets/trafic-aerien-commercial-mensuel-francais-par-paire-daeroports-par-sens-depuis-1990/)
 
 ## 1.Importations des libraries
 
@@ -31,6 +31,17 @@ t0 = Sys.time()
 
 ## 1.Définition des bases de données, implémentation des fonctions utiles et chargement des données
 
+On conctruit un dataframe contenant les adressages des fichiers de données de trafic par aéroports, par liaisons et par compagnies. Ci dessous vous pouvez retrouver un exemple de ce dataframe avec les adressages pour l'année 2019.
+```{r}
+paths = data.frame(2019,"https://www.data.gouv.fr/fr/datasets/r/3b7646ea-276c-4c9b-8151-1e96af2adbf9",
+                   "https://www.data.gouv.fr/fr/datasets/r/9c5354ad-31cb-4217-bc88-fb7c9be22655",
+                   "https://www.data.gouv.fr/fr/datasets/r/ddfea6a0-df7e-4402-99fc-165f573f2e10")
+
+names(paths) = c("year","apt","lsn","cie")
+```
+
+On généralise le tableau précédent à une suite d'années allant par exemple de 2018 à 2022
+
 ```{r parameters}
 if (!requireNamespace("DT")){install.packages("DT")} #install.packages("DT")#if necessary install package
 t0 = Sys.time()
@@ -47,7 +58,7 @@ names(paths) = c("year","apt","lsn","cie")
 
 ```
 
-On implémente les fonctions de calculs nécessaires au tableau de bord
+Pour harmoniser le traitement des données il faut harmoniser les unifier le format des chaînes de caractère. On implémente donc une fonction permettant le traitement des irrégularités de type accent, ponctuation ou encore espace, présents dans les données
 
 ```{r}
 simplify_text = function(texte){#fonction qui simplifie le texte en retirant la ponctuation et les accents
@@ -62,6 +73,33 @@ simplify_text = function(texte){#fonction qui simplifie le texte en retirant la 
   texte=str_replace_all(texte,"[ùûü]","u")
   return(texte)}
     
+```
+
+On cherche maintenant à accéder aux données stockés sur [DataGouv](https://www.data.gouv.fr/fr/datasets/trafic-aerien-commercial-mensuel-francais-par-paire-daeroports-par-sens-depuis-1990/) pour pouvoir les intégrer à un tableau de bord. Nous allons illustrer par un exemple dans un premier temps la récupération des données de trafic par aéroports pour les années 2018 et 2019.
+
+```{r}
+year <- c(2018,2019)
+data_typ <- "apt"
+aptData = NULL
+for (i in year){
+  print(paste0(data_typ," ",i))
+  x <- paths %>%
+    select("year", all_of(data_typ)) %>% 
+    filter(year == i) #filtre sur l'année sélectionnée
+  aptData <- rbind(df,read.csv(x[[2]], sep = ";", dec = ",")) #empile le dataframe sur le précédent
+  }
+aptData <- aptData %>% 
+  mutate(an = str_sub(ANMOIS,1,4)) %>%
+  mutate(mois = str_sub(ANMOIS,5,6))
+names(df)=simplify_text(names(df))
+rm(x,i)
+
+
+```
+
+On géénralise le cas précédent avec une fonction prenant en entrée le type de données que l'on veut extraire (par aéroports, par liaisons ou par compagnies) et on concatène sur toutes les années à disposition de 2018 à 2022.
+
+```{r}
 load_data = function(data_typ){#fonction qui charge les données dans un dataframe
   df = NULL
   for (i in paths[[1]]){
@@ -80,7 +118,6 @@ load_data = function(data_typ){#fonction qui charge les données dans un datafra
   }
 ```
 
-On charge ensuite les données
 
 ```{r}
 #charge les données avec la fonction load_data----
